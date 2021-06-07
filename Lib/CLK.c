@@ -138,6 +138,120 @@ static void CLK_AccessBackupDomain(void)
 	}
 }
 
+void CLK_OscConfig(void)
+{
+#ifdef CLK_USE_HSE
+#ifdef CLK_HSE_BYPASS
+	__HAL_RCC_HSE_CONFIG(RCC_HSE_BYPASS);
+#else
+	__HAL_RCC_HSE_CONFIG(RCC_HSE_ON);
+#endif
+	while(!__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY));
+#else
+	// If not using HSE, use HSI. Logic to change in future....
+	__HAL_RCC_HSI_CONFIG(RCC_HSI_ON);
+	__HAL_RCC_HSI_CALIBRATIONVALUE_ADJUST(RCC_HSICALIBRATION_DEFAULT);
+	while(!__HAL_RCC_GET_FLAG(RCC_FLAG_HSIRDY));
+#endif
+
+#ifdef CLK_USE_MSI
+	__HAL_RCC_MSI_ENABLE();
+	while(!__HAL_RCC_GET_FLAG(RCC_FLAG_MSIRDY));
+	__HAL_RCC_MSI_RANGE_CONFIG(RCC_MSIRANGE_5);
+	__HAL_RCC_MSI_CALIBRATIONVALUE_ADJUST(RCC_MSICALIBRATION_DEFAULT);
+#endif
+
+  /*-------------------------------- PLL Configuration -----------------------*/
+  /* Check the parameters */
+  assert_param(IS_RCC_PLL(RCC_OscInitStruct->PLL.PLLState));
+  if ((RCC_OscInitStruct->PLL.PLLState) != RCC_PLL_NONE)
+  {
+    /* Check if the PLL is used as system clock or not */
+    if(sysclk_source != RCC_SYSCLKSOURCE_STATUS_PLLCLK)
+    {
+      if((RCC_OscInitStruct->PLL.PLLState) == RCC_PLL_ON)
+      {
+        /* Check the parameters */
+        assert_param(IS_RCC_PLLSOURCE(RCC_OscInitStruct->PLL.PLLSource));
+        assert_param(IS_RCC_PLL_MUL(RCC_OscInitStruct->PLL.PLLMUL));
+        assert_param(IS_RCC_PLL_DIV(RCC_OscInitStruct->PLL.PLLDIV));
+
+        /* Disable the main PLL. */
+        __HAL_RCC_PLL_DISABLE();
+
+        /* Get Start Tick */
+        tickstart = HAL_GetTick();
+
+        /* Wait till PLL is disabled */
+        while(__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY)  != 0U)
+        {
+          if((HAL_GetTick() - tickstart ) > PLL_TIMEOUT_VALUE)
+          {
+            return HAL_TIMEOUT;
+          }
+        }
+
+        /* Configure the main PLL clock source, multiplication and division factors. */
+        __HAL_RCC_PLL_CONFIG(RCC_OscInitStruct->PLL.PLLSource,
+                             RCC_OscInitStruct->PLL.PLLMUL,
+                             RCC_OscInitStruct->PLL.PLLDIV);
+        /* Enable the main PLL. */
+        __HAL_RCC_PLL_ENABLE();
+
+        /* Get Start Tick */
+        tickstart = HAL_GetTick();
+
+        /* Wait till PLL is ready */
+        while(__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY)  == 0U)
+        {
+          if((HAL_GetTick() - tickstart ) > PLL_TIMEOUT_VALUE)
+          {
+            return HAL_TIMEOUT;
+          }
+        }
+      }
+      else
+      {
+        /* Disable the main PLL. */
+        __HAL_RCC_PLL_DISABLE();
+
+        /* Get Start Tick */
+        tickstart = HAL_GetTick();
+
+        /* Wait till PLL is disabled */
+        while(__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY)  != 0U)
+        {
+          if((HAL_GetTick() - tickstart ) > PLL_TIMEOUT_VALUE)
+          {
+            return HAL_TIMEOUT;
+          }
+        }
+      }
+    }
+    else
+    {
+      /* Check if there is a request to disable the PLL used as System clock source */
+      if((RCC_OscInitStruct->PLL.PLLState) == RCC_PLL_OFF)
+      {
+        return HAL_ERROR;
+      }
+      else
+      {
+        /* Do not return HAL_ERROR if request repeats the current configuration */
+        pll_config = RCC->CFGR;
+        if((READ_BIT(pll_config, RCC_CFGR_PLLSRC) != RCC_OscInitStruct->PLL.PLLSource) ||
+           (READ_BIT(pll_config, RCC_CFGR_PLLMUL) != RCC_OscInitStruct->PLL.PLLMUL) ||
+           (READ_BIT(pll_config, RCC_CFGR_PLLDIV) != RCC_OscInitStruct->PLL.PLLDIV))
+        {
+          return HAL_ERROR;
+        }
+      }
+    }
+  }
+
+  return HAL_OK;
+}
+
 /*
  * INTERRUPT ROUTINES
  */

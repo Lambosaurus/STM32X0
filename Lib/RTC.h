@@ -61,6 +61,9 @@ void RTC_OnPeriod(uint32_t ms, VoidFunction_t callback);
 void RTC_StopPeriod(void);
 #endif
 
+uint32_t DT_ToEpoch(DateTime_t * dt);
+void DT_FromEpoch(DateTime_t * dt, uint32_t epoch);
+
 /*
  * EXTERN DECLARATIONS
  */

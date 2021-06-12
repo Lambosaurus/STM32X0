@@ -3,10 +3,14 @@
 
 #include "STM32X.h"
 
+// Use this bit to detect whether the comparator modules are available for this MCU
+#ifdef COMP_CSR_COMPxEN
+#define COMP_ENABLED
+
 /*
  * FUNCTIONAL TESTING
  * STM32L0: N
- * STM32F0: NA
+ * STM32F0: N
  */
 
 /*
@@ -61,4 +65,5 @@ extern COMP_t * COMP_1;
 extern COMP_t * COMP_2;
 #endif
 
+#endif //COMP_ENABLED
 #endif //COMP_H

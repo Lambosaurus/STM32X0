@@ -1,6 +1,8 @@
 
 #include "COMP.h"
 
+#ifdef COMP_ENABLED
+
 /*
  * PRIVATE DEFINITIONS
  */
@@ -42,8 +44,8 @@ void COMP_Init(COMP_t * comp, COMP_Input_t inputs)
 {
 	comp->Instance->CSR = inputs
 			| COMP_OUTPUTPOL_NONINVERTED
-			| COMP_POWERMODE_MEDIUMSPEED;
-	__HAL_COMP_ENABLE(comp);
+			| COMP_POWERMODE_MEDIUMSPEED
+			| COMP_CSR_COMPxEN;
 }
 
 void COMP_Deinit(COMP_t * comp)
@@ -113,3 +115,5 @@ void ADC1_COMP_IRQHandler(void)
 }
 #endif
 
+
+#endif // COMP_ENABLED

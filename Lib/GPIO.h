@@ -25,9 +25,9 @@
 typedef GPIO_TypeDef GPIO_t;
 
 typedef enum {
-	GPIO_IT_Rising 			= GPIO_MODE_IT_RISING,
-	GPIO_IT_Falling 		= GPIO_MODE_IT_FALLING,
-	GPIO_IT_Both 			= GPIO_MODE_IT_RISING_FALLING,
+	GPIO_IT_Rising 			= 0x01,
+	GPIO_IT_Falling 		= 0x02,
+	GPIO_IT_Both 			= GPIO_IT_Rising | GPIO_IT_Falling,
 } GPIO_IT_Dir_t;
 
 typedef enum {

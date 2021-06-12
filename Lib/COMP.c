@@ -59,7 +59,7 @@ void COMP_Deinit(COMP_t * comp)
 
 bool COMP_Read(COMP_t * comp)
 {
-	return hcomp->Instance->CSR & COMP_CSR_COMPxOUTVALUE;
+	return comp->Instance->CSR & COMP_CSR_COMPxOUTVALUE;
 }
 
 #ifdef COMP_USE_IRQS
@@ -83,7 +83,7 @@ void COMP_OnChange(COMP_t * comp, GPIO_IT_Dir_t dir, VoidFunction_t callback)
 
 	HAL_NVIC_EnableIRQ(COMP_IRQn);
 }
-#ifdef COMP_USE_IRQS
+#endif //COMP_USE_IRQS
 
 /*
  * PRIVATE FUNCTIONS

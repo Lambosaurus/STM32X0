@@ -2,6 +2,7 @@
 #define COMP_H
 
 #include "STM32X.h"
+#include "GPIO.h"
 
 // Use this bit to detect whether the comparator modules are available for this MCU
 #ifdef COMP_CSR_COMPxEN
@@ -36,7 +37,7 @@ typedef enum {
 } COMP_Input_t;
 
 typedef struct {
-	COMP_TypeDef Instance;
+	COMP_TypeDef * Instance;
 #ifdef COMP_USE_IRQS
 	VoidFunction_t callback;
 #endif

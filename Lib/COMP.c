@@ -11,6 +11,8 @@
 #define COMP_IRQn		ADC1_COMP_IRQn
 #endif
 
+#define WRITE_BIT(reg, bit, set)  (reg = (set) ? (reg | (bit)) : (reg & ~(bit)))
+
 /*
  * PRIVATE TYPES
  */
@@ -43,7 +45,6 @@ COMP_t * COMP_2 = &gCOMP_2;
 void COMP_Init(COMP_t * comp, COMP_Input_t inputs)
 {
 	comp->Instance->CSR = inputs
-			| COMP_OUTPUTPOL_NONINVERTED
 			| COMP_POWERMODE_MEDIUMSPEED
 			| COMP_CSR_COMPxEN;
 }
@@ -69,14 +70,8 @@ void COMP_OnChange(COMP_t * comp, GPIO_IT_Dir_t dir, VoidFunction_t callback)
 
 	__HAL_RCC_SYSCFG_CLK_ENABLE();
     uint32_t exti = COMP_GET_EXTI_LINE(comp->Instance);
-	if(dir & GPIO_IT_Rising)
-	{
-		SET_BIT(EXTI->RTSR, exti);
-	}
-	if(dir & GPIO_IT_Falling)
-	{
-		SET_BIT(EXTI->FTSR, exti);
-	}
+    WRITE_BIT(EXTI->RTSR, exti, (dir & GPIO_IT_Rising));
+    WRITE_BIT(EXTI->FTSR, exti, (dir & GPIO_IT_Falling));
 	// Clear EXTI pending bit - in case its already set
 	WRITE_REG(EXTI->PR, exti);
 	SET_BIT(EXTI->IMR, exti);

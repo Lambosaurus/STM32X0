@@ -34,6 +34,7 @@ typedef enum {
 #endif
 	COMP_Neg_IO1 = COMP_INPUT_MINUS_IO1,
 	COMP_Neg_IO2 = COMP_INPUT_MINUS_IO2,
+	COMP_Input_Inverted = COMP_OUTPUTPOL_INVERTED,
 } COMP_Input_t;
 
 typedef struct {
